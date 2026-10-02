@@ -1,16 +1,50 @@
-# React + Vite
+# E RAY — Recrutement (frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Application React + Vite : site public de recrutement et backoffice RH.
 
-Currently, two official plugins are available:
+## Démarrage
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+L'API Laravel est attendue sur `http://127.0.0.1:8000/api`. Pour changer
+d'adresse, copiez `.env.example` en `.env` et modifiez `VITE_API_URL`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Pages
 
-## Expanding the Oxlint configuration
+| Site public | Chemin |
+|---|---|
+| Accueil | `/` |
+| Offres d'emploi, détail d'une offre | `/jobs`, `/jobs/:id` |
+| Entreprise, À propos, Contact | `/entreprise`, `/a-propos`, `/contact` |
+| Test de recrutement | `/test?candidate_id=…` |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| Backoffice | Chemin |
+|---|---|
+| Tableau de bord | `/admin/dashboard` |
+| Offres, Candidats, Tests QCM | `/admin/jobs`, `/admin/candidates`, `/admin/tests` |
+| Emails, Paramètres | `/admin/emails`, `/admin/settings` |
+
+## Routes API utilisées
+
+Toutes les routes sont déclarées dans `src/services/api.js`.
+
+| Route | Usage |
+|---|---|
+| `GET /jobs` | liste des offres |
+| `POST /admin/jobs` | création d'une offre |
+| `PUT /admin/jobs/{id}`, `DELETE /admin/jobs/{id}` | modification / suppression d'une offre |
+| `GET /candidates`, `POST /candidates` | liste des candidatures / dépôt d'une candidature |
+| `PATCH /candidates/{id}` | changement d'étape (`etat_candidature`) |
+| `GET /candidates/{id}/cv` | téléchargement du CV |
+| `POST /questions/import`, `GET /questions/random`, `POST /questions/submit` | tests QCM |
+| `POST /contact` | formulaire de contact |
+
+## Configuration
+
+- `src/config/site.js` : coordonnées affichées sur le site public.
+- `src/styles/theme.css` : couleurs et composants communs.
+- Les paramètres et modèles d'emails du backoffice sont enregistrés dans le
+  navigateur (localStorage).

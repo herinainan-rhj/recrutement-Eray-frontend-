@@ -662,7 +662,7 @@ function TestStyles() {
 
                 margin-bottom: 8px;
 
-                color: #5b35d5;
+                color: #2f2c95;
 
                 font-size: 12px;
                 font-weight: 700;
@@ -702,7 +702,7 @@ function TestStyles() {
             }
 
             .question-counter strong {
-                color: #5b35d5;
+                color: #2f2c95;
 
                 font-size: 23px;
             }
@@ -748,7 +748,7 @@ function TestStyles() {
 
                 border-radius: 10px;
 
-                background: #5b35d5;
+                background: #2f2c95;
 
                 transition: width 0.25s ease;
             }
@@ -784,8 +784,8 @@ function TestStyles() {
 
                 border-radius: 20px;
 
-                background: #eeeafd;
-                color: #5b35d5;
+                background: #ecebfa;
+                color: #2f2c95;
 
                 font-size: 11px;
                 font-weight: 700;
@@ -853,17 +853,17 @@ function TestStyles() {
             }
 
             .choice:hover {
-                border-color: #9d8be5;
+                border-color: #8f8dd6;
 
-                background: #faf9ff;
+                background: #f7f7fd;
 
                 transform: translateY(-1px);
             }
 
             .choice-selected {
-                border-color: #5b35d5;
+                border-color: #2f2c95;
 
-                background: #f5f2ff;
+                background: #f1f0fb;
             }
 
             .choice-letter {
@@ -886,7 +886,7 @@ function TestStyles() {
             }
 
             .choice-selected .choice-letter {
-                background: #5b35d5;
+                background: #2f2c95;
                 color: #ffffff;
             }
 
@@ -902,7 +902,7 @@ function TestStyles() {
             .choice-check {
                 width: 22px;
 
-                color: #5b35d5;
+                color: #2f2c95;
 
                 font-size: 18px;
                 font-weight: 700;
@@ -959,13 +959,13 @@ function TestStyles() {
             .finish {
                 border: none;
 
-                background: #5b35d5;
+                background: #2f2c95;
                 color: #ffffff;
             }
 
             .next:hover,
             .finish:hover {
-                background: #4725b5;
+                background: #232070;
             }
 
             /*
@@ -999,8 +999,8 @@ function TestStyles() {
 
                 margin: 0 auto 20px;
 
-                border: 4px solid #e5e1f7;
-                border-top-color: #5b35d5;
+                border: 4px solid #dcdbf3;
+                border-top-color: #2f2c95;
 
                 border-radius: 50%;
 
@@ -1047,7 +1047,7 @@ function TestStyles() {
                 border: none;
                 border-radius: 9px;
 
-                background: #5b35d5;
+                background: #2f2c95;
                 color: #ffffff;
 
                 font-size: 14px;
@@ -1088,7 +1088,7 @@ function TestStyles() {
 
                 border-radius: 13px;
 
-                background: #f5f2ff;
+                background: #f1f0fb;
             }
 
             .final-score span {
@@ -1100,7 +1100,7 @@ function TestStyles() {
             .final-score strong {
                 margin-top: 5px;
 
-                color: #5b35d5;
+                color: #2f2c95;
 
                 font-size: 42px;
             }

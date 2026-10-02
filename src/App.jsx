@@ -1,16 +1,24 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import AdminLayout from "./layouts/AdminLayout";
+import PublicLayout from "./layouts/PublicLayout";
+
+import HomePage from "./pages/public/HomePage";
+import JobsPage from "./pages/public/JobsPage";
+import JobDetailPage from "./pages/public/JobDetailPage";
+import CompanyPage from "./pages/public/CompanyPage";
+import AboutPage from "./pages/public/AboutPage";
+import ContactPage from "./pages/public/ContactPage";
+import NotFoundPage from "./pages/public/NotFoundPage";
+import TestPage from "./pages/public/TestPage";
 
 import Dashboard from "./pages/admin/Dashboard";
 import JobsManagement from "./pages/admin/JobsManagement";
-import QuestionnaireManagement from "./pages/admin/QuestionnaireManagement";
-import TestPage from "./pages/public/TestPage";
 import CandidatesManagement from "./pages/admin/CandidatesManagement";
+import QuestionnaireManagement from "./pages/admin/QuestionnaireManagement";
+import EmailsPage from "./pages/admin/EmailsPage";
+import SettingsPage from "./pages/admin/SettingsPage";
 
-import JobsPage from "./pages/public/JobsPage";
-
-import "./styles/app.css";
 
 function App() {
 
@@ -24,67 +32,34 @@ function App() {
                    SITE PUBLIC
                 ========================================= */}
 
-                <Route
-                    path="/"
-                    element={<JobsPage />}
-                />
+                <Route element={<PublicLayout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/jobs" element={<JobsPage />} />
+                    <Route path="/jobs/:id" element={<JobDetailPage />} />
+                    <Route path="/entreprise" element={<CompanyPage />} />
+                    <Route path="/a-propos" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
 
-                <Route
-                    path="/test"
-                    element={<TestPage />}
-                />
-
-                <Route
-                    path="/jobs"
-                    element={<JobsPage />}
-                />
-
-                <Route
-                    path="/admin/candidates"
-                    element={<CandidatesManagement />}
-                />
+                {/* TEST DE RECRUTEMENT (sans navigation, pour rester concentré) */}
+                <Route path="/test" element={<TestPage />} />
 
 
                 {/* =========================================
-                   ADMIN — DASHBOARD
+                   BACKOFFICE
                 ========================================= */}
 
-                <Route
-                    path="/admin/dashboard"
-                    element={
-                        <AdminLayout>
-                            <Dashboard />
-                        </AdminLayout>
-                    }
-                />
-
-
-                {/* =========================================
-                   ADMIN — OFFRES
-                ========================================= */}
-
-                <Route
-                    path="/admin/jobs"
-                    element={
-                        <AdminLayout>
-                            <JobsManagement />
-                        </AdminLayout>
-                    }
-                />
-
-
-                {/* =========================================
-                   ADMIN — TESTS QCM
-                ========================================= */}
-
-                <Route
-                    path="/admin/tests"
-                    element={
-                        <AdminLayout>
-                            <QuestionnaireManagement />
-                        </AdminLayout>
-                    }
-                />
+                <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="jobs" element={<JobsManagement />} />
+                    <Route path="candidates" element={<CandidatesManagement />} />
+                    <Route path="tests" element={<QuestionnaireManagement />} />
+                    <Route path="emails" element={<EmailsPage />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="*" element={<Navigate to="dashboard" replace />} />
+                </Route>
 
             </Routes>
 

@@ -777,7 +777,7 @@ Réponse : B`}
 
                     border-color: #7c3aed;
 
-                    background: #faf9ff;
+                    background: #f7f7fd;
 
                     transform: translateY(-1px);
 
@@ -786,9 +786,9 @@ Réponse : B`}
 
                 .file-dropzone.file-selected {
 
-                    border-color: #5b35d5;
+                    border-color: #2f2c95;
 
-                    background: #faf9ff;
+                    background: #f7f7fd;
 
                 }
 
@@ -1098,7 +1098,7 @@ Réponse : B`}
 
                     padding: 13px 22px;
 
-                    background: #5b35d5;
+                    background: #2f2c95;
 
                     color: white;
 
@@ -1126,13 +1126,13 @@ Réponse : B`}
 
                 .import-button:hover:not(:disabled) {
 
-                    background: #4725b5;
+                    background: #232070;
 
                     transform: translateY(-1px);
 
                     box-shadow:
                         0 5px 15px
-                        rgba(91, 53, 213, 0.2);
+                        rgba(47, 44, 149, 0.2);
 
                 }
 

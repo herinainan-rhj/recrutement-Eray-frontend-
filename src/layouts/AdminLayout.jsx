@@ -1,179 +1,88 @@
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
+import { useState } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import Icon from "../components/Icon";
+import Logo from "../components/Logo";
+import "../styles/admin.css";
 
-export default function AdminLayout({ children }) {
+const LINKS = [
+    { to: "/admin/dashboard", label: "Tableau de bord", icon: "dashboard" },
+    { to: "/admin/jobs", label: "Offres d'emploi", icon: "briefcase" },
+    { to: "/admin/candidates", label: "Candidats", icon: "users" },
+    { to: "/admin/tests", label: "Tests QCM", icon: "clipboard" },
+    { to: "/admin/emails", label: "Emails", icon: "mail" },
+    { to: "/admin/settings", label: "Paramètres", icon: "settings" },
+];
+
+export default function AdminLayout() {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const { pathname } = useLocation();
+
+    const current = LINKS.find((link) => pathname.startsWith(link.to));
+
     return (
-        <div className="admin-layout">
+        <div className="bo-layout">
 
             {/* SIDEBAR */}
-            <aside className="admin-sidebar">
-                <Sidebar />
+            <aside className={`bo-sidebar ${menuOpen ? "open" : ""}`}>
+                <div className="bo-sidebar-brand">
+                    <Logo to="/admin/dashboard" light />
+                    <span>Espace RH</span>
+                </div>
+
+                <nav className="bo-nav">
+                    {LINKS.map((link) => (
+                        <NavLink
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            <Icon name={link.icon} />
+                            {link.label}
+                        </NavLink>
+                    ))}
+                </nav>
+
+                <Link to="/" className="bo-sidebar-site">
+                    <Icon name="external" size={16} />
+                    Voir le site public
+                </Link>
             </aside>
 
-            {/* PARTIE DROITE */}
-            <div className="admin-main">
+            {menuOpen && (
+                <div
+                    className="bo-backdrop"
+                    onClick={() => setMenuOpen(false)}
+                ></div>
+            )}
 
-                {/* NAVBAR */}
-                <header className="admin-navbar">
-                    <Navbar />
+            {/* PARTIE DROITE */}
+            <div className="bo-main">
+
+                <header className="bo-topbar">
+                    <button
+                        type="button"
+                        className="ui-icon-btn bo-menu-btn"
+                        onClick={() => setMenuOpen(true)}
+                        aria-label="Ouvrir le menu"
+                    >
+                        <Icon name="menu" />
+                    </button>
+
+                    <span className="bo-topbar-title">
+                        {current?.label || "Administration"}
+                    </span>
+
+                    <div className="bo-user">
+                        <span className="bo-avatar">RH</span>
+                        <span>Admin RH</span>
+                    </div>
                 </header>
 
-                {/* CONTENU DE LA PAGE */}
-                <main className="admin-page-content">
-                    {children}
+                <main className="bo-content">
+                    <Outlet />
                 </main>
 
             </div>
-
-            <style>{`
-
-                * {
-                    box-sizing: border-box;
-                }
-
-                html,
-                body,
-                #root {
-                    margin: 0;
-                    padding: 0;
-                    width: 100%;
-                    min-height: 100%;
-                }
-
-                body {
-                    overflow-x: hidden;
-                }
-
-                /* =========================================
-                   STRUCTURE PRINCIPALE
-                ========================================= */
-
-                .admin-layout {
-                    display: flex;
-                    width: 100%;
-                    min-height: 100vh;
-                    background: #f5f7fb;
-                }
-
-                /* =========================================
-                   SIDEBAR
-                ========================================= */
-
-                .admin-sidebar {
-                    width: 250px;
-                    min-width: 250px;
-                    min-height: 100vh;
-                    background: #ffffff;
-                    border-right: 1px solid #e6e9ef;
-                    position: sticky;
-                    top: 0;
-                    align-self: flex-start;
-                    z-index: 100;
-                }
-
-                /* =========================================
-                   PARTIE DROITE
-                ========================================= */
-
-                .admin-main {
-                    flex: 1;
-                    min-width: 0;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                /* =========================================
-                   NAVBAR
-                ========================================= */
-
-                .admin-navbar {
-                    width: 100%;
-                    height: 70px;
-                    min-height: 70px;
-                    background: #ffffff;
-                    border-bottom: 1px solid #e6e9ef;
-                    position: sticky;
-                    top: 0;
-                    z-index: 90;
-                }
-
-                /* =========================================
-                   CONTENU
-                ========================================= */
-
-                .admin-page-content {
-                    flex: 1;
-                    width: 100%;
-                    min-width: 0;
-                    padding: 0;
-                }
-
-                /* =========================================
-                   TABLETTE
-                ========================================= */
-
-                @media (max-width: 1000px) {
-
-                    .admin-sidebar {
-                        width: 220px;
-                        min-width: 220px;
-                    }
-
-                }
-
-                /* =========================================
-                   MOBILE
-                ========================================= */
-
-                @media (max-width: 768px) {
-
-                    .admin-layout {
-                        display: block;
-                        min-height: 100vh;
-                    }
-
-                    .admin-sidebar {
-                        width: 100%;
-                        min-width: 100%;
-                        min-height: auto;
-                        position: relative;
-                        border-right: none;
-                        border-bottom: 1px solid #e6e9ef;
-                    }
-
-                    .admin-main {
-                        width: 100%;
-                        min-height: auto;
-                    }
-
-                    .admin-navbar {
-                        height: 60px;
-                        min-height: 60px;
-                        position: sticky;
-                        top: 0;
-                    }
-
-                    .admin-page-content {
-                        width: 100%;
-                    }
-
-                }
-
-                /* =========================================
-                   PETIT MOBILE
-                ========================================= */
-
-                @media (max-width: 480px) {
-
-                    .admin-navbar {
-                        height: 56px;
-                        min-height: 56px;
-                    }
-
-                }
-
-            `}</style>
         </div>
     );
 }

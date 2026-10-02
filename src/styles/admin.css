@@ -1,0 +1,687 @@
+/* =========================================
+   BACKOFFICE
+========================================= */
+
+.bo-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.bo-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    width: 250px;
+    min-width: 250px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 14px;
+    background: var(--navy);
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.bo-sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 28px;
+    padding: 0 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.bo-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bo-nav a,
+.bo-sidebar-site {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: var(--radius-sm);
+    color: inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.bo-nav a:hover,
+.bo-sidebar-site:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.bo-nav a.active {
+    background: rgba(0, 169, 212, 0.2);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.bo-nav a.active .icon {
+    color: #4fd1f0;
+}
+
+.bo-sidebar-site {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0;
+    padding-top: 16px;
+    font-size: 13.5px;
+}
+
+.bo-backdrop {
+    display: none;
+}
+
+
+/* =========================================
+   BARRE SUPÉRIEURE
+========================================= */
+
+.bo-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.bo-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    height: 64px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.bo-topbar-title {
+    flex: 1;
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.bo-menu-btn {
+    display: none;
+}
+
+.bo-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.bo-avatar {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.bo-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.bo-page {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 30px 28px 50px;
+}
+
+
+/* =========================================
+   EN-TÊTE DE PAGE
+========================================= */
+
+.bo-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.bo-head h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+.bo-head p {
+    margin-top: 4px;
+    color: var(--text-2);
+    font-size: 14.5px;
+}
+
+.bo-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+
+/* =========================================
+   CARTES
+========================================= */
+
+.bo-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.bo-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bo-card-head h2 {
+    font-size: 16.5px;
+    font-weight: 700;
+}
+
+.bo-card-head span,
+.bo-card-head a {
+    color: var(--text-2);
+    font-size: 13px;
+}
+
+.bo-card-head a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.bo-card-body {
+    padding: 22px;
+}
+
+
+/* =========================================
+   INDICATEURS
+========================================= */
+
+.bo-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.bo-stat {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.bo-stat-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.bo-stat span {
+    display: block;
+    color: var(--text-2);
+    font-size: 13px;
+}
+
+.bo-stat strong {
+    display: block;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.bo-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+
+/* =========================================
+   BARRES DE RÉPARTITION
+========================================= */
+
+.bo-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.bo-bar-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 150px) 1fr 34px;
+    align-items: center;
+    gap: 12px;
+    font-size: 13.5px;
+}
+
+.bo-bar-label {
+    overflow: hidden;
+    color: var(--text-2);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bo-bar-track {
+    height: 10px;
+    border-radius: 4px;
+    background: #eef1f5;
+}
+
+.bo-bar-fill {
+    height: 100%;
+    min-width: 2px;
+    border-radius: 4px;
+    background: var(--primary);
+}
+
+.bo-bar-value {
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================
+   BARRE D'OUTILS / FILTRES
+========================================= */
+
+.bo-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bo-toolbar select.ui-input {
+    width: auto;
+    min-width: 170px;
+}
+
+
+/* =========================================
+   TABLEAUX
+========================================= */
+
+.bo-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.bo-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bo-table th {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+    color: var(--muted);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.bo-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.bo-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.bo-table tbody tr:hover {
+    background: #fafbff;
+}
+
+.bo-table .num {
+    font-variant-numeric: tabular-nums;
+}
+
+.bo-table-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.bo-person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.bo-person .bo-avatar {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+}
+
+.bo-person strong {
+    display: block;
+    font-size: 14px;
+}
+
+.bo-person small,
+.bo-sub {
+    display: block;
+    color: var(--muted);
+    font-size: 12.5px;
+}
+
+.bo-score {
+    min-width: 100px;
+}
+
+.bo-score-value {
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.bo-score-track {
+    height: 5px;
+    border-radius: 20px;
+    background: #eef1f5;
+    overflow: hidden;
+}
+
+.bo-score-fill {
+    height: 100%;
+    border-radius: 20px;
+}
+
+.bo-score-fill.success { background: var(--success); }
+.bo-score-fill.warning { background: #d69e2e; }
+.bo-score-fill.danger { background: #e0434d; }
+
+.bo-muted {
+    color: var(--muted);
+}
+
+
+/* =========================================
+   FICHE DÉTAIL
+========================================= */
+
+.bo-detail-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.bo-detail-head .bo-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 16px;
+}
+
+.bo-detail-head h3 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.bo-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.bo-detail-grid div {
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    min-width: 0;
+}
+
+.bo-detail-grid dt {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.bo-detail-grid dd {
+    overflow-wrap: anywhere;
+    font-size: 14.5px;
+    font-weight: 600;
+}
+
+.bo-inline {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.bo-inline .ui-field {
+    flex: 1;
+    min-width: 180px;
+    margin-bottom: 0;
+}
+
+
+/* =========================================
+   EMAILS
+========================================= */
+
+.bo-emails {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+}
+
+.bo-template-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px;
+}
+
+.bo-template-list button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-2);
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.bo-template-list button:hover {
+    background: var(--bg);
+}
+
+.bo-template-list button.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.bo-vars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.bo-vars code {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text-2);
+    font-size: 12.5px;
+}
+
+.bo-preview {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #fafbfc;
+    font-size: 14px;
+}
+
+.bo-preview strong {
+    display: block;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bo-preview p {
+    color: var(--text-2);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.bo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.bo-form-narrow {
+    max-width: 760px;
+}
+
+.bo-form-narrow .bo-card + .bo-card {
+    margin-top: 22px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1150px) {
+
+    .bo-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bo-emails {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+
+    .bo-sidebar {
+        position: fixed;
+        left: 0;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+    }
+
+    .bo-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .bo-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 150;
+        display: block;
+        background: rgba(11, 27, 58, 0.5);
+    }
+
+    .bo-menu-btn {
+        display: inline-flex;
+    }
+
+    .bo-topbar {
+        padding: 0 16px;
+    }
+
+    .bo-page {
+        padding: 22px 16px 40px;
+    }
+
+    .bo-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+
+    .bo-stats,
+    .bo-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bo-user span:last-child {
+        display: none;
+    }
+
+    .bo-head h1 {
+        font-size: 22px;
+    }
+}

@@ -1,347 +1,483 @@
-import { useState } from "react";
-import api from "../../services/api";
+import { useMemo, useState } from "react";
+import Icon from "../../components/Icon";
+import Modal from "../../components/Modal";
+import useApi from "../../hooks/useApi";
+import {
+    createJob,
+    deleteJob,
+    fetchJobs,
+    getErrorMessage,
+    updateJob,
+} from "../../services/api";
+
+const EMPTY_JOB = {
+    titre: "",
+    description: "",
+    departement: "",
+    localisation: "",
+    type_contrat: "",
+    niveau_etude: "",
+    experience_requise: "",
+    competences: "",
+};
+
+const CONTRACTS = ["CDI", "CDD", "Stage", "Freelance"];
+const LEVELS = ["Bac", "Bac+2", "Licence", "Master 1", "Master 2"];
 
 export default function JobsManagement() {
+    const { data: jobs, loading, error, reload } = useApi(
+        fetchJobs,
+        "Impossible de charger les offres."
+    );
 
-    const [formData, setFormData] = useState({
-        titre: "",
-        description: "",
-        departement: "",
-        localisation: "",
-        type_contrat: "",
-        niveau_etude: "",
-        experience_requise: "",
-        competences: ""
-    });
+    const [search, setSearch] = useState("");
+    const [notice, setNotice] = useState(null);
 
-    const [message, setMessage] = useState("");
+    /* `editing` : null (fermé), {} (création) ou l'offre à modifier */
+    const [editing, setEditing] = useState(null);
+    const [formData, setFormData] = useState(EMPTY_JOB);
+    const [formError, setFormError] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    const [toDelete, setToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
+
+    const filteredJobs = useMemo(() => {
+        const term = search.trim().toLowerCase();
+
+        return jobs
+            .filter((job) =>
+                [job.titre, job.departement, job.localisation, job.type_contrat]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(term)
+            )
+            .sort((a, b) => (b.id || 0) - (a.id || 0));
+    }, [jobs, search]);
 
 
     /* =========================================
-       MODIFICATION DES CHAMPS
+       FORMULAIRE
     ========================================= */
 
-    const handleChange = (e) => {
+    const openForm = (job) => {
+        setFormError("");
 
+        setFormData(
+            job
+                ? Object.fromEntries(
+                      Object.keys(EMPTY_JOB).map((key) => [key, job[key] ?? ""])
+                  )
+                : EMPTY_JOB
+        );
+
+        setEditing(job || {});
+    };
+
+    const handleChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         });
+    };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        setSaving(true);
+        setFormError("");
+
+        try {
+            if (editing.id) {
+                await updateJob(editing.id, formData);
+            } else {
+                await createJob(formData);
+            }
+
+            setNotice({
+                type: "success",
+                text: editing.id
+                    ? "L'offre a été modifiée."
+                    : "L'offre a été créée.",
+            });
+
+            setEditing(null);
+            reload();
+
+        } catch (err) {
+            console.error("Erreur enregistrement offre :", err);
+
+            setFormError(
+                getErrorMessage(err, "Vérifiez les champs du formulaire.")
+            );
+        } finally {
+            setSaving(false);
+        }
     };
 
 
     /* =========================================
-       ENVOI DU FORMULAIRE
+       SUPPRESSION
     ========================================= */
 
-    const handleSubmit = async (e) => {
-
-        e.preventDefault();
-
-        setMessage("");
+    const handleDelete = async () => {
+        setDeleting(true);
 
         try {
+            await deleteJob(toDelete.id);
 
-            await api.post(
-                "/admin/jobs",
-                formData
-            );
+            setNotice({ type: "success", text: "L'offre a été supprimée." });
+            reload();
 
-            setMessage(
-                "✅ Offre créée avec succès"
-            );
+        } catch (err) {
+            console.error("Erreur suppression offre :", err);
 
-            setFormData({
-                titre: "",
-                description: "",
-                departement: "",
-                localisation: "",
-                type_contrat: "",
-                niveau_etude: "",
-                experience_requise: "",
-                competences: ""
+            setNotice({
+                type: "error",
+                text: getErrorMessage(err, "L'offre n'a pas pu être supprimée."),
             });
-
-        } catch (error) {
-
-            console.error(
-                "Erreur création offre :",
-                error
-            );
-
-            if (error.response) {
-
-                console.log(
-                    "Réponse Laravel :",
-                    error.response.data
-                );
-
-                setMessage(
-                    "❌ Erreur : vérifiez les champs du formulaire"
-                );
-
-            } else {
-
-                setMessage(
-                    "❌ Impossible de contacter le serveur Laravel"
-                );
-
-            }
+        } finally {
+            setDeleting(false);
+            setToDelete(null);
         }
     };
 
 
     return (
+        <div className="bo-page">
 
-        <div className="jobs-page">
-
-            <div className="jobs-container">
-
-
-                {/* =====================================
-                   HEADER
-                ===================================== */}
-
-                <div className="page-header">
-
-                    <div>
-
-                        <div className="breadcrumb">
-                            Administration
-                            <span>›</span>
-                            Offres d'emploi
-                        </div>
-
-                        <h1>
-                            Créer une offre d'emploi
-                        </h1>
-
-                        <p>
-                            Ajoutez une nouvelle offre de recrutement
-                            à votre plateforme.
-                        </p>
-
-                    </div>
-
+            <div className="bo-head">
+                <div>
+                    <h1>Offres d'emploi</h1>
+                    <p>Créez, modifiez et supprimez les offres publiées sur le site.</p>
                 </div>
 
-
-                {/* =====================================
-                   MESSAGE
-                ===================================== */}
-
-                {message && (
-
-                    <div
-                        className={`alert-message ${
-                            message.startsWith("✅")
-                                ? "success"
-                                : "error"
-                        }`}
-                    >
-                        {message}
-                    </div>
-
-                )}
-
-
-                {/* =====================================
-                   FORMULAIRE
-                ===================================== */}
-
-                <form
-                    className="job-form"
-                    onSubmit={handleSubmit}
+                <button
+                    type="button"
+                    className="ui-btn"
+                    onClick={() => openForm(null)}
                 >
+                    <Icon name="plus" size={16} />
+                    Nouvelle offre
+                </button>
+            </div>
 
+            {notice && (
+                <div
+                    className={`ui-alert ${notice.type}`}
+                    role={notice.type === "error" ? "alert" : "status"}
+                >
+                    <Icon name={notice.type === "error" ? "alert" : "check"} />
+                    {notice.text}
+                </div>
+            )}
 
-                    {/* TITRE */}
+            <section className="bo-card">
 
-                    <div className="form-group">
-
-                        <label htmlFor="titre">
-                            Titre du poste
-                        </label>
+                <div className="bo-toolbar">
+                    <div className="ui-search">
+                        <Icon name="search" size={16} />
 
                         <input
-                            id="titre"
-                            type="text"
-                            name="titre"
-                            value={formData.titre}
-                            onChange={handleChange}
-                            placeholder="Ex : Développeur Laravel"
-                            required
+                            className="ui-input"
+                            type="search"
+                            placeholder="Rechercher une offre..."
+                            aria-label="Rechercher une offre"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
                         />
-
                     </div>
 
+                    <button
+                        type="button"
+                        className="ui-btn ui-btn-secondary"
+                        onClick={reload}
+                    >
+                        <Icon name="refresh" size={16} />
+                        Actualiser
+                    </button>
+                </div>
 
-                    {/* DESCRIPTION */}
-
-                    <div className="form-group">
-
-                        <label htmlFor="description">
-                            Description du poste
-                        </label>
-
-                        <textarea
-                            id="description"
-                            rows="6"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            placeholder="Décrivez le poste, les missions et les responsabilités..."
-                            required
-                        />
-
+                {loading ? (
+                    <div className="ui-state">
+                        <div className="ui-spinner"></div>
+                        <p>Chargement des offres...</p>
                     </div>
+                ) : error ? (
+                    <div className="ui-state">
+                        <Icon name="alert" size={34} />
+                        <h3>Offres indisponibles</h3>
+                        <p>{error}</p>
+                    </div>
+                ) : filteredJobs.length === 0 ? (
+                    <div className="ui-state">
+                        <Icon name="inbox" size={34} />
+
+                        <h3>
+                            {search ? "Aucun résultat" : "Aucune offre publiée"}
+                        </h3>
+
+                        <p>
+                            {search
+                                ? "Aucune offre ne correspond à votre recherche."
+                                : "Créez votre première offre pour commencer à recevoir des candidatures."}
+                        </p>
+
+                        {!search && (
+                            <button
+                                type="button"
+                                className="ui-btn"
+                                onClick={() => openForm(null)}
+                            >
+                                <Icon name="plus" size={16} />
+                                Créer une offre
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="bo-table-wrap">
+                        <table className="bo-table">
+                            <thead>
+                                <tr>
+                                    <th>Poste</th>
+                                    <th>Localisation</th>
+                                    <th>Contrat</th>
+                                    <th>Niveau</th>
+                                    <th>Expérience</th>
+                                    <th aria-label="Actions"></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {filteredJobs.map((job) => (
+                                    <tr key={job.id}>
+                                        <td>
+                                            <strong>{job.titre}</strong>
+
+                                            <span className="bo-sub">
+                                                {job.departement || "—"}
+                                            </span>
+                                        </td>
+
+                                        <td>{job.localisation || "—"}</td>
+
+                                        <td>
+                                            {job.type_contrat ? (
+                                                <span className="ui-pill">
+                                                    {job.type_contrat}
+                                                </span>
+                                            ) : (
+                                                "—"
+                                            )}
+                                        </td>
+
+                                        <td>{job.niveau_etude || "—"}</td>
+
+                                        <td className="num">
+                                            {job.experience_requise ?? "—"} an(s)
+                                        </td>
+
+                                        <td>
+                                            <div className="bo-table-actions">
+                                                <a
+                                                    className="ui-icon-btn"
+                                                    href={`/jobs/${job.id}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    title="Voir sur le site"
+                                                    aria-label={`Voir ${job.titre} sur le site`}
+                                                >
+                                                    <Icon name="external" size={16} />
+                                                </a>
+
+                                                <button
+                                                    type="button"
+                                                    className="ui-icon-btn"
+                                                    onClick={() => openForm(job)}
+                                                    title="Modifier"
+                                                    aria-label={`Modifier ${job.titre}`}
+                                                >
+                                                    <Icon name="edit" size={16} />
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="ui-icon-btn danger"
+                                                    onClick={() => setToDelete(job)}
+                                                    title="Supprimer"
+                                                    aria-label={`Supprimer ${job.titre}`}
+                                                >
+                                                    <Icon name="trash" size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+            </section>
 
 
-                    {/* DEPARTEMENT + LOCALISATION */}
+            {/* =====================================
+               FORMULAIRE CRÉATION / MODIFICATION
+            ===================================== */}
 
-                    <div className="form-row">
+            {editing && (
+                <Modal
+                    wide
+                    title={editing.id ? "Modifier l'offre" : "Créer une offre d'emploi"}
+                    onClose={() => setEditing(null)}
+                    footer={
+                        <>
+                            <button
+                                type="button"
+                                className="ui-btn ui-btn-secondary"
+                                onClick={() => setEditing(null)}
+                            >
+                                Annuler
+                            </button>
 
-                        <div className="form-group">
+                            <button
+                                type="submit"
+                                form="job-form"
+                                className="ui-btn"
+                                disabled={saving}
+                            >
+                                {saving
+                                    ? "Enregistrement..."
+                                    : editing.id
+                                      ? "Enregistrer"
+                                      : "Créer l'offre"}
+                            </button>
+                        </>
+                    }
+                >
+                    <form id="job-form" onSubmit={handleSubmit}>
 
-                            <label htmlFor="departement">
-                                Département
-                            </label>
+                        {formError && (
+                            <div className="ui-alert error" role="alert">
+                                <Icon name="alert" />
+                                {formError}
+                            </div>
+                        )}
+
+                        <div className="ui-field">
+                            <label htmlFor="titre">Titre du poste</label>
 
                             <input
-                                id="departement"
+                                id="titre"
+                                className="ui-input"
                                 type="text"
-                                name="departement"
-                                value={formData.departement}
+                                name="titre"
+                                value={formData.titre}
                                 onChange={handleChange}
-                                placeholder="Ex : Informatique"
+                                placeholder="Ex : Développeur Laravel"
                                 required
                             />
-
                         </div>
 
+                        <div className="ui-field">
+                            <label htmlFor="description">Description du poste</label>
 
-                        <div className="form-group">
-
-                            <label htmlFor="localisation">
-                                Localisation
-                            </label>
-
-                            <input
-                                id="localisation"
-                                type="text"
-                                name="localisation"
-                                value={formData.localisation}
+                            <textarea
+                                id="description"
+                                className="ui-input"
+                                rows="5"
+                                name="description"
+                                value={formData.description}
                                 onChange={handleChange}
-                                placeholder="Ex : Antananarivo"
+                                placeholder="Décrivez le poste, les missions et les responsabilités..."
                                 required
                             />
-
                         </div>
 
-                    </div>
+                        <div className="ui-row">
+                            <div className="ui-field">
+                                <label htmlFor="departement">Département</label>
 
+                                <input
+                                    id="departement"
+                                    className="ui-input"
+                                    type="text"
+                                    name="departement"
+                                    value={formData.departement}
+                                    onChange={handleChange}
+                                    placeholder="Ex : Informatique"
+                                    required
+                                />
+                            </div>
 
-                    {/* CONTRAT + NIVEAU */}
+                            <div className="ui-field">
+                                <label htmlFor="localisation">Localisation</label>
 
-                    <div className="form-row">
+                                <input
+                                    id="localisation"
+                                    className="ui-input"
+                                    type="text"
+                                    name="localisation"
+                                    value={formData.localisation}
+                                    onChange={handleChange}
+                                    placeholder="Ex : Antananarivo"
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                        <div className="form-group">
+                        <div className="ui-row">
+                            <div className="ui-field">
+                                <label htmlFor="type_contrat">Type de contrat</label>
 
-                            <label htmlFor="type_contrat">
-                                Type de contrat
+                                <select
+                                    id="type_contrat"
+                                    className="ui-input"
+                                    name="type_contrat"
+                                    value={formData.type_contrat}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Choisir un type</option>
+
+                                    {CONTRACTS.map((contract) => (
+                                        <option key={contract} value={contract}>
+                                            {contract}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="ui-field">
+                                <label htmlFor="niveau_etude">Niveau d'étude</label>
+
+                                <select
+                                    id="niveau_etude"
+                                    className="ui-input"
+                                    name="niveau_etude"
+                                    value={formData.niveau_etude}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Choisir un niveau</option>
+
+                                    {LEVELS.map((level) => (
+                                        <option key={level} value={level}>
+                                            {level}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="ui-field">
+                            <label htmlFor="experience_requise">
+                                Expérience requise (en années)
                             </label>
-
-                            <select
-                                id="type_contrat"
-                                name="type_contrat"
-                                value={formData.type_contrat}
-                                onChange={handleChange}
-                                required
-                            >
-
-                                <option value="">
-                                    Choisir un type
-                                </option>
-
-                                <option value="CDI">
-                                    CDI
-                                </option>
-
-                                <option value="CDD">
-                                    CDD
-                                </option>
-
-                                <option value="Stage">
-                                    Stage
-                                </option>
-
-                                <option value="Freelance">
-                                    Freelance
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div className="form-group">
-
-                            <label htmlFor="niveau_etude">
-                                Niveau d'étude
-                            </label>
-
-                            <select
-                                id="niveau_etude"
-                                name="niveau_etude"
-                                value={formData.niveau_etude}
-                                onChange={handleChange}
-                                required
-                            >
-
-                                <option value="">
-                                    Choisir un niveau
-                                </option>
-
-                                <option value="Bac">
-                                    Bac
-                                </option>
-
-                                <option value="Bac+2">
-                                    Bac+2
-                                </option>
-
-                                <option value="Licence">
-                                    Licence
-                                </option>
-
-                                <option value="Master 1">
-                                    Master 1
-                                </option>
-
-                                <option value="Master 2">
-                                    Master 2
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-
-                    {/* EXPERIENCE */}
-
-                    <div className="form-group">
-
-                        <label htmlFor="experience_requise">
-                            Expérience requise
-                        </label>
-
-                        <div className="input-with-suffix">
 
                             <input
                                 id="experience_requise"
+                                className="ui-input"
                                 type="number"
                                 name="experience_requise"
                                 value={formData.experience_requise}
@@ -350,648 +486,67 @@ export default function JobsManagement() {
                                 placeholder="0"
                                 required
                             />
-
-                            <span>
-                                année(s)
-                            </span>
-
                         </div>
 
-                    </div>
-
-
-                    {/* COMPETENCES */}
-
-                    <div className="form-group">
-
-                        <label htmlFor="competences">
-                            Compétences recherchées
-                        </label>
-
-                        <textarea
-                            id="competences"
-                            rows="5"
-                            name="competences"
-                            value={formData.competences}
-                            onChange={handleChange}
-                            placeholder="Ex : Laravel, React, PostgreSQL, Git..."
-                            required
-                        />
-
-                        <small>
-                            Séparez les différentes compétences par des virgules.
-                        </small>
-
-                    </div>
-
-
-                    {/* BOUTON */}
-
-                    <div className="form-actions">
-
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                        >
-                            <span>
-                                ＋
-                            </span>
-
-                            Créer l'offre
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-
-            {/* =========================================
-               CSS
-            ========================================= */}
-
-            <style>{`
-
-                * {
-                    box-sizing: border-box;
-                }
-
-
-                /* =====================================
-                   PAGE
-                ===================================== */
-
-                .jobs-page {
-
-                    width: 100%;
-
-                    min-height:
-                        calc(100vh - 70px);
-
-                    background: #f5f7fb;
-
-                    padding:
-                        32px 40px 50px;
-
-                }
-
-
-                .jobs-container {
-
-                    width: 100%;
-
-                    max-width: 1250px;
-
-                    margin: 0 auto;
-
-                }
-
-
-                /* =====================================
-                   BREADCRUMB
-                ===================================== */
-
-                .breadcrumb {
-
-                    display: flex;
-
-                    align-items: center;
-
-                    gap: 8px;
-
-                    margin-bottom: 10px;
-
-                    color: #8a93a5;
-
-                    font-size: 13px;
-
-                    font-weight: 500;
-
-                }
-
-
-                .breadcrumb span {
-
-                    color: #b4bac5;
-
-                }
-
-
-                /* =====================================
-                   HEADER
-                ===================================== */
-
-                .page-header {
-
-                    margin-bottom: 28px;
-
-                }
-
-
-                .page-header h1 {
-
-                    margin: 0 0 8px;
-
-                    color: #172033;
-
-                    font-size: 30px;
-
-                    line-height: 1.2;
-
-                    font-weight: 750;
-
-                }
-
-
-                .page-header p {
-
-                    margin: 0;
-
-                    color: #697386;
-
-                    font-size: 15px;
-
-                    line-height: 1.6;
-
-                }
-
-
-                /* =====================================
-                   MESSAGE
-                ===================================== */
-
-                .alert-message {
-
-                    margin-bottom: 20px;
-
-                    padding: 15px 18px;
-
-                    border-radius: 10px;
-
-                    font-size: 14px;
-
-                    font-weight: 500;
-
-                }
-
-
-                .alert-message.success {
-
-                    background: #effaf3;
-
-                    border: 1px solid #b9e5c7;
-
-                    color: #23643a;
-
-                }
-
-
-                .alert-message.error {
-
-                    background: #fff1f1;
-
-                    border: 1px solid #efc0c0;
-
-                    color: #8b2e2e;
-
-                }
-
-
-                /* =====================================
-                   FORMULAIRE
-                ===================================== */
-
-                .job-form {
-
-                    width: 100%;
-
-                    background: #ffffff;
-
-                    border: 1px solid #e6e9ef;
-
-                    border-radius: 16px;
-
-                    padding: 32px;
-
-                    box-shadow:
-                        0 8px 30px
-                        rgba(25, 35, 55, 0.06);
-
-                }
-
-
-                /* =====================================
-                   GROUPES
-                ===================================== */
-
-                .form-group {
-
-                    width: 100%;
-
-                    margin-bottom: 22px;
-
-                }
-
-
-                .form-group label {
-
-                    display: block;
-
-                    margin-bottom: 8px;
-
-                    color: #293246;
-
-                    font-size: 14px;
-
-                    font-weight: 600;
-
-                }
-
-
-                .form-group input,
-                .form-group textarea,
-                .form-group select {
-
-                    width: 100%;
-
-                    border: 1px solid #dfe3ea;
-
-                    border-radius: 9px;
-
-                    padding: 12px 14px;
-
-                    background: #ffffff;
-
-                    color: #293246;
-
-                    font-family: inherit;
-
-                    font-size: 14px;
-
-                    outline: none;
-
-                    transition:
-                        border-color 0.2s ease,
-                        box-shadow 0.2s ease;
-
-                }
-
-
-                .form-group input {
-
-                    height: 46px;
-
-                }
-
-
-                .form-group textarea {
-
-                    resize: vertical;
-
-                    min-height: 110px;
-
-                    line-height: 1.6;
-
-                }
-
-
-                .form-group select {
-
-                    height: 46px;
-
-                    cursor: pointer;
-
-                }
-
-
-                .form-group input:focus,
-                .form-group textarea:focus,
-                .form-group select:focus {
-
-                    border-color: #6d45d9;
-
-                    box-shadow:
-                        0 0 0 3px
-                        rgba(109, 69, 217, 0.10);
-
-                }
-
-
-                .form-group input::placeholder,
-                .form-group textarea::placeholder {
-
-                    color: #a2a9b6;
-
-                }
-
-
-                .form-group small {
-
-                    display: block;
-
-                    margin-top: 7px;
-
-                    color: #8a93a5;
-
-                    font-size: 12px;
-
-                }
-
-
-                /* =====================================
-                   DEUX COLONNES
-                ===================================== */
-
-                .form-row {
-
-                    width: 100%;
-
-                    display: grid;
-
-                    grid-template-columns:
-                        repeat(2, minmax(0, 1fr));
-
-                    gap: 20px;
-
-                }
-
-
-                .form-row .form-group {
-
-                    min-width: 0;
-
-                }
-
-
-                /* =====================================
-                   EXPERIENCE
-                ===================================== */
-
-                .input-with-suffix {
-
-                    position: relative;
-
-                }
-
-
-                .input-with-suffix input {
-
-                    padding-right: 90px;
-
-                }
-
-
-                .input-with-suffix span {
-
-                    position: absolute;
-
-                    right: 14px;
-
-                    top: 50%;
-
-                    transform:
-                        translateY(-50%);
-
-                    color: #8a93a5;
-
-                    font-size: 13px;
-
-                    pointer-events: none;
-
-                }
-
-
-                /* =====================================
-                   ACTIONS
-                ===================================== */
-
-                .form-actions {
-
-                    display: flex;
-
-                    justify-content: flex-end;
-
-                    padding-top: 5px;
-
-                }
-
-
-                .btn-primary {
-
-                    min-height: 46px;
-
-                    padding:
-                        12px 22px;
-
-                    display: flex;
-
-                    align-items: center;
-
-                    justify-content: center;
-
-                    gap: 8px;
-
-                    border: none;
-
-                    border-radius: 9px;
-
-                    background: #5b35d5;
-
-                    color: #ffffff;
-
-                    font-size: 14px;
-
-                    font-weight: 600;
-
-                    cursor: pointer;
-
-                    transition:
-                        background 0.2s ease,
-                        transform 0.2s ease,
-                        box-shadow 0.2s ease;
-
-                }
-
-
-                .btn-primary:hover {
-
-                    background: #4725b5;
-
-                    transform:
-                        translateY(-1px);
-
-                    box-shadow:
-                        0 5px 15px
-                        rgba(91, 53, 213, 0.20);
-
-                }
-
-
-                .btn-primary span {
-
-                    font-size: 18px;
-
-                    line-height: 1;
-
-                }
-
-
-                /* =====================================
-                   TABLETTE
-                ===================================== */
-
-                @media (max-width: 1000px) {
-
-                    .jobs-page {
-
-                        padding:
-                            28px 25px 40px;
-
+                        <div className="ui-field">
+                            <label htmlFor="competences">Compétences recherchées</label>
+
+                            <textarea
+                                id="competences"
+                                className="ui-input"
+                                rows="3"
+                                name="competences"
+                                value={formData.competences}
+                                onChange={handleChange}
+                                placeholder="Ex : Laravel, React, PostgreSQL, Git..."
+                                required
+                            />
+
+                            <small>
+                                Séparez les différentes compétences par des virgules.
+                            </small>
+                        </div>
+
+                    </form>
+                </Modal>
+            )}
+
+
+            {/* =====================================
+               CONFIRMATION DE SUPPRESSION
+            ===================================== */}
+
+            {toDelete && (
+                <Modal
+                    title="Supprimer cette offre ?"
+                    onClose={() => setToDelete(null)}
+                    footer={
+                        <>
+                            <button
+                                type="button"
+                                className="ui-btn ui-btn-secondary"
+                                onClick={() => setToDelete(null)}
+                            >
+                                Annuler
+                            </button>
+
+                            <button
+                                type="button"
+                                className="ui-btn ui-btn-danger"
+                                onClick={handleDelete}
+                                disabled={deleting}
+                            >
+                                {deleting ? "Suppression..." : "Supprimer"}
+                            </button>
+                        </>
                     }
-
-
-                    .job-form {
-
-                        padding: 25px;
-
-                    }
-
-                }
-
-
-                /* =====================================
-                   MOBILE
-                ===================================== */
-
-                @media (max-width: 768px) {
-
-                    .jobs-page {
-
-                        min-height:
-                            calc(100vh - 60px);
-
-                        padding:
-                            24px 18px 35px;
-
-                    }
-
-
-                    .page-header {
-
-                        margin-bottom: 20px;
-
-                    }
-
-
-                    .page-header h1 {
-
-                        font-size: 25px;
-
-                    }
-
-
-                    .page-header p {
-
-                        font-size: 14px;
-
-                    }
-
-
-                    .job-form {
-
-                        padding: 20px;
-
-                        border-radius: 13px;
-
-                    }
-
-
-                    .form-row {
-
-                        grid-template-columns: 1fr;
-
-                        gap: 0;
-
-                    }
-
-
-                    .form-actions {
-
-                        justify-content: stretch;
-
-                    }
-
-
-                    .btn-primary {
-
-                        width: 100%;
-
-                    }
-
-                }
-
-
-                /* =====================================
-                   PETIT MOBILE
-                ===================================== */
-
-                @media (max-width: 480px) {
-
-                    .jobs-page {
-
-                        padding:
-                            18px 12px 30px;
-
-                    }
-
-
-                    .job-form {
-
-                        padding: 16px;
-
-                    }
-
-
-                    .breadcrumb {
-
-                        font-size: 12px;
-
-                    }
-
-
-                    .page-header h1 {
-
-                        font-size: 22px;
-
-                    }
-
-
-                    .page-header p {
-
-                        font-size: 13px;
-
-                    }
-
-
-                    .form-group {
-
-                        margin-bottom: 18px;
-
-                    }
-
-
-                    .form-group input,
-                    .form-group textarea,
-                    .form-group select {
-
-                        font-size: 13px;
-
-                    }
-
-                }
-
-            `}</style>
+                >
+                    <p>
+                        L'offre <strong>{toDelete.titre}</strong> ne sera plus
+                        visible sur le site. Cette action est définitive.
+                    </p>
+                </Modal>
+            )}
 
         </div>
     );
